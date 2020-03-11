@@ -62,7 +62,7 @@ user = api.get_user(handle)
 
 # myStreamListener = MyStreamListener()
 # myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
-#
+
 # # Streams do not terminate unless the connection is closed, blocking the thread. Tweepy offers a convenient is_async
 # # parameter on filter so the stream will run on a new thread.
 # myStream.filter(locations=[-74,40,-73,41], is_async=True)
@@ -71,19 +71,21 @@ user = api.get_user(handle)
 
 # ny_tweets = api.search(geocode="40.712772,-74.006058,600mi", granularity="country")
 
+# print(len(ny_tweets))
+
 
 def dump_to_json(tweets):
     tweet_list = []
     for tweet in tweets:
-        tweet_list.append (tweet._json)
+        tweet_list.append(tweet._json)
 
     with open ('api_tweet_data.json', 'w') as f:
-        json.dump (tweet_list, f, indent=2)
+        json.dump(tweet_list, f, indent=2)
 
     return tweet_list
 
 
-# print(dump_to_json(ny_tweets))
+print(dump_to_json(ny_tweets))
 
 tweet_stats_list = []
 
@@ -178,8 +180,8 @@ def common_words_in_data():
                 if word not in words:
                     words.append (word)
                 elif word in words:
-                    top100[word] = list_text.count (word)
-        sorted_dict = sorted (top100.items (), key=lambda x: x[1], reverse=True)
+                    top100[word] = list_text.count(word)
+        sorted_dict = sorted(top100.items(), key=lambda x: x[1], reverse=True)
         tweet_stats_list.append (f"there are to used common words {sorted_dict}\n")
         # return f"there are to used common words {sorted_dict}"
         return sorted_dict
@@ -189,24 +191,23 @@ def common_words_in_data():
 def common_symbols_in_data():
     symbols = []
     letters = 'abcdefghijklmnopqrstuvwxyz'
-    alphabet = list (letters)
+    alphabet = list(letters)
     top100 = {}
     # list_letters = []
     # add all the words to a list
     # if any of the words already exist than add that new work as a dictionary with its number value
     with open ('api_tweet_data.json', 'r') as f:
         for one in json.load (f):
-            list_text = one['text'].split (' ')
+            list_text = one['text'].split(' ')
             # print(list_text)
-            for i in range (0, len (alphabet)):
-                for word in list_text:
-                    # print(word)
-                    if alphabet[i] in list (word):
+            for word in list_text:
+                for letter in word:
+                    if letter not in alphabet:
                         # print("z" in ["a","b"])
-                        symbols.append (word)
+                        symbols.append(letter)
                         # print(symbols)
-                    # elif word in symbols:
-                    #     top100[word] = list_text.count(word)
+
+                        top100[word] = list_text.count(word)
                 # print(word)
                 # for letter in word:
                 #     list_letters.append(letter)
@@ -218,7 +219,7 @@ def common_symbols_in_data():
         # return f"there are to used common symbols {sorted_dict}"
 
 
-print (common_symbols_in_data ())
+# print (common_symbols_in_data ())
 
 
 # Percentage of tweets that use punctuation.
@@ -281,20 +282,20 @@ def avg_tweet_num_per_user():
 # The hour with the greatest number of tweets.
 # Write your results to a new text file.
 
-def write_to_file():
-    avg_word_length()
-    avg_tweet_length()
-    avg_follower_num()
-    hashtag_percentage()
-    mention_percentage()
-    common_words_in_data()
-    longest_word_in_data()
-    shortest_word_in_data()
-    most_tweet_num_user()
-    avg_tweet_num_per_user()
-    with open ("./tweet_stats.json", "w") as file_:
-        for one in tweet_stats_list:
-            file_.write (one)
+# def write_to_file():
+#     avg_word_length()
+#     avg_tweet_length()
+#     avg_follower_num()
+#     hashtag_percentage()
+#     mention_percentage()
+#     common_words_in_data()
+#     longest_word_in_data()
+#     shortest_word_in_data()
+#     most_tweet_num_user()
+#     avg_tweet_num_per_user()
+#     with open ("./tweet_stats.json", "w") as file_:
+#         for one in tweet_stats_list:
+#             file_.write (one)
 
 
-write_to_file ()
+# write_to_file()

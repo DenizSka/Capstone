@@ -13,10 +13,19 @@ most_tweet_num_user, avg_tweet_num_per_user \
 import mysql.connector
 from mysql.connector import errorcode
 
+
+
+import pandas as pd
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+
+import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings("ignore")
+
 cnx = mysql.connector.connect (user='root', password='Welcome_123',
                                host='127.0.0.1',
                                database='twitter')
-cursor = cnx.cursor ()
+cursor = cnx.cursor()
 
 # # Write a script that stores the data returned from the Twitter API in a SQL database.
 # # Then read that data from your database and use the code you wrote previously to analyze it.
@@ -40,14 +49,14 @@ TABLES['twitter_stats'] = (
     "  PRIMARY KEY (`id`)"
     ") ENGINE=InnoDB")
 
-# TABLES['top_words'] = (
-#     "CREATE TABLE `twitter_stats` ("
-#     "  `id` SMALLINT NOT NULL AUTO_INCREMENT,"
-#     "  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
-#     "  `common_words_in_data` varchar(1000) NOT NULL,"
-#     "  `amount of times` varchar(100) NOT NULL,"
-#     "  PRIMARY KEY (`id`)"
-#     ") ENGINE=InnoDB")
+TABLES['top_words'] = (
+    "CREATE TABLE `top_words` ("
+    "  `id` SMALLINT NOT NULL AUTO_INCREMENT,"
+    "  `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,"
+    "  `word` varchar(1000) NOT NULL,"
+    "  `count` varchar(100) NOT NULL,"
+    "  PRIMARY KEY (`id`)"
+    ") ENGINE=InnoDB")
 
 def create_table(cursor):
     for table_name in TABLES:
@@ -85,15 +94,29 @@ data_tweets = {
         'avg_tweet_num_per_user': avg_tweet_num_per_user()
     }
 
-def insert_into_table():
+add_word = ("INSERT INTO top_words (word, count) VALUES (%(word)s, %(count)s);")
+
+
+def insert_into_twitter_stats():
     print ("inserting into table twitter_stats", end='')
     cursor.execute(add_tweet, data_tweets)
     # Make sure data is committed to the database
-    cnx.commit()
-    cursor.close()
-    cnx.close()
 
-# insert_into_table()
+def insert_into_top_words():
+    d = {}
+    s = common_words_in_data()
+
+    for word, count in s:
+        d["word"] = (word)
+        d["count"] = (count)
+        cursor.execute (add_word, d)
+    print("inserting into table top words", end='')
+
+insert_into_twitter_stats()
+insert_into_top_words()
+
+cnx.commit()
+
 
 # sql_select_Query = "delete from twitter_stats"
 
@@ -103,5 +126,26 @@ def insert_into_table():
 # for one in cursor:
 #   print(one)
 # cnx.commit()
+# cursor.close()
+# cnx.close()
+
+sql_select_Query = "select * from top_words"
+cursor.execute(sql_select_Query)
+table_rows = cursor.fetchall()
+# print(table_rows)
+df = pd.DataFrame(table_rows)
+# Start with one review:
+text = df[2].to_list()
+text = " ".join(text)
+print(text)
+# Create and generate a word cloud image:
+wordcloud = WordCloud(max_font_size=50, max_words=100, background_color="white").generate(text)
+#
+# # Display the generated image:
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+
+
 # cursor.close()
 # cnx.close()
